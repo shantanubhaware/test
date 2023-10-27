@@ -81,6 +81,7 @@ class CSampleController extends CEntrataApp {
 	
 		$this->setRenderTemplate( 'app_path/view_sample_page.tpl', $arrmixTemplateParameters );
 	}
+	echo "test";
 }
 	
 ?>
