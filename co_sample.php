@@ -4,6 +4,7 @@ class CSampleController extends CEntrataApp {
 	protected $m_arrobjSamples;
 	protected $m_arrPropertyPreferences;
 	protected $m_arrobjSamplesForDisplay;
+	protected $m_strErrorMessage;
 	
 	public function initialize() {} 
 	
@@ -14,23 +15,20 @@ class CSampleController extends CEntrataApp {
 				break;
 		}
 	}
-	
-	/**
-	* Handler functions
-	**/
-	
-	public function handleViewSamplePage() {
-		
+
+	public function validateRequestParamAndLoadData(){
+
 		if( isset( $this->getRequestData( [ 'property_id' ] ) ) ) {
-			$this->displayMessage( 'Invalid Request', 'Invalid property id. Please try again later.', '' );
-			return;
+			
+			$this->m_strErrorMessage = 'Invalid property id. Please try again later';
+			return false;
 		}
 		
 		if( isset( $this->getRequestData( [ 'customer_id' ] ) ) ) {
-			$this->displayMessage( 'Invalid Request', 'Invalid customer id. Please try again later.', '' );
-			return;
+			$this->m_strErrorMessage = 'Invalid customer id. Please try again later';
+			return false;
 		}
-		
+
 		$intPropertyId = $this->getRequestData( [ 'property_id' ] );
 		$intCustomerId = $this->getRequestData( [ 'customer_id' ] );
 		
@@ -38,7 +36,22 @@ class CSampleController extends CEntrataApp {
 		
 		$this->m_arrPropertyPreferences = fetchPropertyPreferencesByKeysByPropertyIdByCid( [ 'DISPLAY_EXAMPLE_DETAILS', 'SHOW_IN_UI', 'SAMPLE_PRODUCT_PERMISSION' ], $intPropertyId, $this->getCid(), $this->m_objDB );
 		
-		$this->m_arrPropertyPreferences = rekey( 'key', $this->m_arrPropertyPreferences );
+	}
+	
+	/**
+	* Handler functions
+	**/
+	
+	public function handleViewSamplePage() {
+		
+		if(false == $this->validateRequestParamAndLoadData()){
+			$this->displayMessage( 'Invalid Request', $this->m_strErrorMessage, '' );
+			return;
+		};
+
+		if(true == valArr($this->m_arrPropertyPreferences)){
+			$this->m_arrPropertyPreferences = rekey( 'key', $this->m_arrPropertyPreferences );
+		}
 		
 		$this->m_arrobjSamplesForDisplay = [];
 		
