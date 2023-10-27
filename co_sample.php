@@ -43,26 +43,45 @@ class CSampleController extends CEntrataApp {
 		$this->m_arrobjSamplesForDisplay = [];
 		
 		if( valArrKeyExists( $this->m_arrPropertyPreferences, 'SAMPLE_PRODUCT_PERMISSION', 1 ) ) {
-			foreach( $this->m_arrobjSamples as $objSample ) {
-				$objExample = fetchExampleByIdByCid( $objSample->getExampleId(), $this->getCid(), $this->m_objAnotherDB );
-				
-				if( valArrKeyExists( $this->m_arrPropertyPreferences, 'DISPLAY_EXAMPLE_DETAILS', 1 ) ) {	
-					$objSample->setExampleTitle( $objExample->getTitle() );
-					$objSample->setExampleDescription( $objExample->getDescription() );
-				}
-				
-				if( valArrKeyExists( $this->m_arrPropertyPreferences, 'SHOW_IN_UI', 1 ) ) {
-					
-					$this->m_arrobjSamplesForDisplay[$objSample->getId()] = $objSample;
-				}
-				
-				if( $objSample->isDefaultSample() ) {
-					$this->m_arrobjSamplesForDisplay[$objSample->getId()] = $objSample;
-				}
-			}
+			$this->m_arrobjSamplesForDisplay = fetchSampleForDisplay($this->m_arrobjSamples, $cid, $this->m_objAnotherDB, $this->m_arrPropertyPreferences, $this->m_arrobjSamplesForDisplay);
 		}
 		
 		$this->displayViewSamplePage();
+	}
+	/**
+	 * @param arrmix                                                        $arrObjSamples
+	 * @param int                                                           $intCid
+  	 * @param \CDatabase                                                    $ObjAnotherDB
+    	 * @param array 							$ArrPropertyPreferences
+	 * @param arrobj                                                        $ArrobjSamplesForDisplay
+	 * @return array
+	 */
+	public function fetchSampleForDisplay($arrObjSamples, $intCid , $ObjAnotherDB, $ArrPropertyPreferences, $ArrobjSamplesForDisplay){
+		$ArrobjSamplesForDisplay = [];
+		foreach( $arrObjSamples as $objSample ) {
+				$objExample = fetchExampleByIdByCid( $objSample->getExampleId(),$intCid, $ObjAnotherDB );
+				
+				if( valArrKeyExists( $ArrPropertyPreferences, 'DISPLAY_EXAMPLE_DETAILS', 1 ) ) {
+					if( false == is_null( $objExample->getTitle() )){
+					$objSample->setExampleTitle( $objExample->getTitle() );
+					}
+					if( false == is_null( $objExample->getDescription() )){
+					$objSample->setExampleDescription( $objExample->getDescription() );
+					}
+				}
+				
+				if( valArrKeyExists( $ArrPropertyPreferences, 'SHOW_IN_UI', 1 ) && true == isset( $ArrobjSamplesForDisplay[$objSample->getId()] )) {
+					
+					$ArrobjSamplesForDisplay[$objSample->getId()] = $objSample;
+				}
+				
+				if( $objSample->isDefaultSample() && true == isset( $ArrobjSamplesForDisplay[$objSample->getId()] ) ) {
+					
+					$ArrobjSamplesForDisplay[$objSample->getId()] = $objSample;
+					
+				}
+			}
+		return $ArrobjSamplesForDisplay;
 	}
 	
 	/**
