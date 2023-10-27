@@ -1,8 +1,6 @@
 <?php
 class CSampleController extends CEntrataApp {
 
-	protected $m_arrobjSamples;
-	protected $m_arrPropertyPreferences;
 	protected $m_arrobjSamplesForDisplay;
 	
 	public function initialize() {} 
@@ -18,40 +16,44 @@ class CSampleController extends CEntrataApp {
 	/**
 	* Handler functions
 	**/
+
+	
 	
 	public function handleViewSamplePage() {
 		
-		if( isset( $this->getRequestData( [ 'property_id' ] ) ) ) {
-			$this->displayMessage( 'Invalid Request', 'Invalid property id. Please try again later.', '' );
+		if( isset( $this->getRequestData( [ 'property_id' ] ) ) && valId( $this->getRequestData( [ 'property_id' ] ) ) ) {
+			$this->displayMessage( __('Invalid Request'), __('Invalid property id. Please try again later.'), '' );
 			return;
 		}
 		
-		if( isset( $this->getRequestData( [ 'customer_id' ] ) ) ) {
-			$this->displayMessage( 'Invalid Request', 'Invalid customer id. Please try again later.', '' );
+		if( isset( $this->getRequestData( [ 'customer_id' ] ) ) && valId( $this->getRequestData( [ 'customer_id' ] ) ) ) {
+			$this->displayMessage( __('Invalid Request'), __('Invalid customer id. Please try again later.'), '' );
 			return;
 		}
+		//Above Validation Code can be moved in seperate function and handled using BoolISValid
 		
 		$intPropertyId = $this->getRequestData( [ 'property_id' ] );
 		$intCustomerId = $this->getRequestData( [ 'customer_id' ] );
 		
-		$this->m_arrobjSamples = fetchSamplesByCustomerIdByPropertyIdByCid( $intCustomerId, $intPropertyId, $this->getCid(), $this->m_objDB );
+		$arrobjSamples = fetchSamplesByCustomerIdByPropertyIdByCid( $intCustomerId, $intPropertyId, $this->getCid(), $this->m_objDB );
 		
-		$this->m_arrPropertyPreferences = fetchPropertyPreferencesByKeysByPropertyIdByCid( [ 'DISPLAY_EXAMPLE_DETAILS', 'SHOW_IN_UI', 'SAMPLE_PRODUCT_PERMISSION' ], $intPropertyId, $this->getCid(), $this->m_objDB );
+		$arrPropertyPreferences = fetchPropertyPreferencesByKeysByPropertyIdByCid( [ 'DISPLAY_EXAMPLE_DETAILS', 'SHOW_IN_UI', 'SAMPLE_PRODUCT_PERMISSION' ], $intPropertyId, $this->getCid(), $this->m_objDB );
 		
-		$this->m_arrPropertyPreferences = rekey( 'key', $this->m_arrPropertyPreferences );
+		$arrPropertyPreferences = rekey( 'key', $this->m_arrPropertyPreferences );
 		
 		$this->m_arrobjSamplesForDisplay = [];
 		
-		if( valArrKeyExists( $this->m_arrPropertyPreferences, 'SAMPLE_PRODUCT_PERMISSION', 1 ) ) {
-			foreach( $this->m_arrobjSamples as $objSample ) {
+		if( valArrKeyExists( $arrPropertyPreferences, 'SAMPLE_PRODUCT_PERMISSION', 1 ) ) {
+			//Fetch all Samples and loop to use update only
+			foreach( $arrobjSamples as $objSample ) {
 				$objExample = fetchExampleByIdByCid( $objSample->getExampleId(), $this->getCid(), $this->m_objAnotherDB );
 				
-				if( valArrKeyExists( $this->m_arrPropertyPreferences, 'DISPLAY_EXAMPLE_DETAILS', 1 ) ) {	
+				if( valArrKeyExists( $arrPropertyPreferences, 'DISPLAY_EXAMPLE_DETAILS', 1 ) ) {	
 					$objSample->setExampleTitle( $objExample->getTitle() );
 					$objSample->setExampleDescription( $objExample->getDescription() );
 				}
 				
-				if( valArrKeyExists( $this->m_arrPropertyPreferences, 'SHOW_IN_UI', 1 ) ) {
+				if( valArrKeyExists( $arrPropertyPreferences, 'SHOW_IN_UI', 1 ) ) {
 					
 					$this->m_arrobjSamplesForDisplay[$objSample->getId()] = $objSample;
 				}
@@ -68,7 +70,7 @@ class CSampleController extends CEntrataApp {
 	/**
 	* Other function
 	**/
-
+	
 	
 	/**
 	* Display functions
