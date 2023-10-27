@@ -43,23 +43,24 @@ class CSampleController extends CEntrataApp {
 		$this->m_arrobjSamplesForDisplay = [];
 		
 		if( valArrKeyExists( $this->m_arrPropertyPreferences, 'SAMPLE_PRODUCT_PERMISSION', 1 ) ) {
+			$arrObjExampleIds = [];
 			foreach( $this->m_arrobjSamples as $objSample ) {
-				$objExample = fetchExampleByIdByCid( $objSample->getExampleId(), $this->getCid(), $this->m_objAnotherDB );
-				
-				if( valArrKeyExists( $this->m_arrPropertyPreferences, 'DISPLAY_EXAMPLE_DETAILS', 1 ) ) {	
-					$objSample->setExampleTitle( $objExample->getTitle() );
-					$objSample->setExampleDescription( $objExample->getDescription() );
-				}
-				
+				$arrObjExampleIds = $objSample->getExampleId();
 				if( valArrKeyExists( $this->m_arrPropertyPreferences, 'SHOW_IN_UI', 1 ) ) {
-					
 					$this->m_arrobjSamplesForDisplay[$objSample->getId()] = $objSample;
 				}
-				
 				if( $objSample->isDefaultSample() ) {
 					$this->m_arrobjSamplesForDisplay[$objSample->getId()] = $objSample;
 				}
 			}
+
+			$arrobjExample = fetchExampleByIdsByCid( $arrObjExampleIds, $this->getCid(), $this->m_objAnotherDB );
+			foreach( $arrobjExample as $objExample ) {
+				if( valArrKeyExists( $this->m_arrPropertyPreferences, 'DISPLAY_EXAMPLE_DETAILS', 1 ) ) {
+					//to do need to update $objSample here
+				}
+			}
+			
 		}
 		
 		$this->displayViewSamplePage();
@@ -68,7 +69,10 @@ class CSampleController extends CEntrataApp {
 	/**
 	* Other function
 	**/
-
+	public function fetchExampleByIdsByCid( $arrObjExampleIds, $this->getCid(), $this->m_objAnotherDB ){
+		//to do
+		return $arrobjExample
+	}
 	
 	/**
 	* Display functions
